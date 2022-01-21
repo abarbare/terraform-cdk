@@ -1,4 +1,4 @@
-import { Testing, TerraformStack } from "../lib";
+import { Testing, TerraformStack, Fn } from "../lib";
 import { TestProvider, TestResource, OtherTestResource } from "./helper";
 import { TestDataSource } from "./helper/data-source";
 import { TerraformOutput } from "../lib/terraform-output";
@@ -98,7 +98,7 @@ test("with complex computed list", () => {
   const otherResource = new OtherTestResource(stack, "othertest", {});
 
   new TestResource(stack, "test", {
-    name: otherResource.complexComputedList("0").id,
+    name: Fn.lookup(Fn.element(otherResource.complexComputedList, 0), "id", ""),
   });
 
   expect(Testing.synth(stack)).toMatchSnapshot();

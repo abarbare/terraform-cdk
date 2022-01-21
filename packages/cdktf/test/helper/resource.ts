@@ -1,7 +1,7 @@
 import {
   TerraformResource,
   TerraformMetaArguments,
-  ComplexComputedList,
+  ComplexListItem,
 } from "../../lib";
 import { Construct } from "constructs";
 import { TestProviderMetadata } from "./provider";
@@ -108,8 +108,8 @@ export class OtherTestResource extends TerraformResource {
     return this.getListAttribute("names");
   }
 
-  public complexComputedList(index: string) {
-    return new TestComplexComputedList(this, "complex_computed_list", index);
+  public get complexComputedList() {
+    return [new TestComplexListItem(this, "complex_computed_list")];
   }
 
   public get outputRef() {
@@ -121,7 +121,7 @@ export class OtherTestResource extends TerraformResource {
   }
 }
 
-class TestComplexComputedList extends ComplexComputedList {
+class TestComplexListItem extends ComplexListItem {
   public get id() {
     return this.getStringAttribute("id");
   }

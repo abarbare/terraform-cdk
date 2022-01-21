@@ -1,6 +1,8 @@
-import { Token, IResolvable } from "./tokens";
-import { IInterpolatingParent } from "./terraform-addressable";
-import { Fn, propertyAccess } from ".";
+import { IResolvable, Token } from "./tokens";
+import {
+  IInterpolatingParent,
+  ITerraformAddressable,
+} from "./terraform-addressable";
 
 abstract class ComplexComputedAttribute implements IInterpolatingParent {
   constructor(
@@ -113,34 +115,6 @@ export class AnyMap {
   }
 }
 
-export class ComplexComputedList extends ComplexComputedAttribute {
-  constructor(
-    protected terraformResource: IInterpolatingParent,
-    protected terraformAttribute: string,
-    protected complexComputedListIndex: string,
-    protected wrapsSet?: boolean
-  ) {
-    super(terraformResource, terraformAttribute);
-  }
-
-  public interpolationForAttribute(property: string) {
-    if (this.wrapsSet) {
-      return propertyAccess(
-        Fn.tolist(
-          this.terraformResource.interpolationForAttribute(
-            this.terraformAttribute
-          )
-        ),
-        [this.complexComputedListIndex, property]
-      );
-    }
-
-    return this.terraformResource.interpolationForAttribute(
-      `${this.terraformAttribute}.${this.complexComputedListIndex}.${property}`
-    );
-  }
-}
-
 export class ComplexObject extends ComplexComputedAttribute {
   constructor(
     protected terraformResource: IInterpolatingParent,
@@ -157,7 +131,40 @@ export class ComplexObject extends ComplexComputedAttribute {
 
   protected interpolationAsList() {
     return this.terraformResource.interpolationForAttribute(
-      `${this.terraformAttribute}.*`
+      `${this.terraformAttribute}`
     );
+  }
+}
+
+const COMPLEX_LIST_ITEM_SYMBOL = Symbol.for("cdktf/ComplexListItem");
+export class ComplexListItem
+  extends ComplexComputedAttribute
+  implements ITerraformAddressable
+{
+  constructor(
+    protected terraformResource: IInterpolatingParent,
+    protected terraformAttribute: string
+  ) {
+    super(terraformResource, terraformAttribute);
+    Object.defineProperty(this, COMPLEX_LIST_ITEM_SYMBOL, { value: true });
+  }
+
+  public static isComplexListItem(x: any): x is ComplexListItem {
+    return x !== null && typeof x === "object" && COMPLEX_LIST_ITEM_SYMBOL in x;
+  }
+
+  public interpolationForAttribute(property: string): IResolvable {
+    throw new Error(`Cannot directly access property ${property} in list which is only known at runtime.
+Use Fn.lookup(Fn.element(yourList, yourIndex), "${property}", defaultValue) instead`);
+  }
+
+  public interpolationAsList() {
+    return this.terraformResource.interpolationForAttribute(
+      `${this.terraformAttribute}`
+    );
+  }
+
+  public get fqn() {
+    return Token.asString(this.interpolationAsList());
   }
 }

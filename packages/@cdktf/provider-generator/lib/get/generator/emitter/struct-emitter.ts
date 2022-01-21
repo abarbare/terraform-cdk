@@ -58,15 +58,13 @@ export class StructEmitter {
 
   private emitStructs(resource: ResourceModel) {
     resource.structs.forEach((struct) => {
-      if (struct.isSingleItem) {
+      if (struct.isSingleItem || struct.isClass) {
         // We use the interface here for the configuration / inputs of a resource / nested block
         this.emitInterface(resource, struct);
         // And we use the class for the attributes / outputs of a resource / nested block
         if (!struct.isProvider) {
           this.emitClass(struct, struct.outputReferenceName);
         }
-      } else if (struct.isClass) {
-        this.emitClass(struct);
       } else {
         this.emitInterface(resource, struct);
       }
@@ -174,33 +172,32 @@ export class StructEmitter {
   private emitClass(struct: Struct, name = struct.name) {
     this.code.openBlock(
       `export class ${name} extends ${
-        struct.isSingleItem
-          ? "cdktf.ComplexObject"
-          : "cdktf.ComplexComputedList"
+        struct.isSingleItem ? "cdktf.ComplexObject" : "cdktf.ComplexListItem"
       }`
     );
 
-    if (struct.isSingleItem) {
-      this.code.line("private isEmptyObject = false;");
-      this.code.line();
+    this.code.line("private isEmptyObject = false;");
+    this.code.line();
 
-      this.code.line(`/**`);
-      this.code.line(`* @param terraformResource The parent resource`);
-      this.code.line(
-        `* @param terraformAttribute The attribute on the parent resource this class is referencing`
-      );
-      this.code.line(`*/`);
-      this.code.openBlock(
-        `public constructor(terraformResource: cdktf.IInterpolatingParent, terraformAttribute: string)`
-      );
-      this.code.line(`super(terraformResource, terraformAttribute);`);
-      this.code.closeBlock();
+    this.code.line(`/**`);
+    this.code.line(`* @param terraformResource The parent resource`);
+    this.code.line(
+      `* @param terraformAttribute The attribute on the parent resource this class is referencing`
+    );
+    this.code.line(`*/`);
+    this.code.openBlock(
+      `public constructor(terraformResource: cdktf.IInterpolatingParent, terraformAttribute: string)`
+    );
+    this.code.line(`super(terraformResource, terraformAttribute);`);
+    this.code.closeBlock();
 
-      this.code.line();
+    this.code.line();
+    if (struct.attributeType !== "stored_class" || struct.isSingleItem) {
       this.emitInternalValueGetter(struct);
       this.code.line();
       this.emitInternalValueSetter(struct);
-    }
+    } // else: complex computed lists have no internal value since they are only computed now
+    // and thereby cannot be set by the user at all
 
     for (const att of struct.attributes) {
       this.attributesEmitter.emit(
@@ -221,6 +218,11 @@ export class StructEmitter {
     this.code.line("let hasAnyValues = this.isEmptyObject;");
     this.code.line("const internalValueResult: any = {};");
     for (const att of struct.attributes) {
+      if (att.getterType._type === "stored_class" && !att.type.isSingleItem) {
+        // complex computed lists have no internal value since they are only computed now
+        // and thereby cannot be set by the user at all
+        break;
+      }
       if (att.isStored) {
         if (att.getterType._type === "stored_class") {
           this.code.openBlock(
@@ -257,7 +259,7 @@ export class StructEmitter {
       if (att.isStored) {
         if (att.setterType._type === "stored_class") {
           this.code.line(`this.${att.storageName}.internalValue = undefined;`);
-        } else {
+        } else if (att.setterType._type !== "none") {
           this.code.line(`this.${att.storageName} = undefined;`);
         }
       }
@@ -271,7 +273,7 @@ export class StructEmitter {
           this.code.line(
             `this.${att.storageName}.internalValue = value.${att.name};`
           );
-        } else {
+        } else if (att.setterType._type !== "none") {
           this.code.line(`this.${att.storageName} = value.${att.name};`);
         }
       }

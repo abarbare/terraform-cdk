@@ -49,7 +49,43 @@ export interface AcmCertificateConfig extends cdktf.TerraformMetaArguments {
   */
   readonly options?: AcmCertificateOptions;
 }
-export class AcmCertificateDomainValidationOptions extends cdktf.ComplexComputedList {
+export interface AcmCertificateDomainValidationOptions {
+}
+
+export function acmCertificateDomainValidationOptionsToTerraform(struct?: AcmCertificateDomainValidationOptions): any {
+  if (!cdktf.canInspect(struct) || cdktf.Tokenization.isResolvable(struct)) { return struct; }
+  if (cdktf.isComplexElement(struct)) {
+    throw new Error(\\"A complex element was used as configuration, this is not supported: https://cdk.tf/complex-object-as-configuration\\");
+  }
+  return {
+  }
+}
+
+export class AcmCertificateDomainValidationOptionsOutputReference extends cdktf.ComplexListItem {
+  private isEmptyObject = false;
+
+  /**
+  * @param terraformResource The parent resource
+  * @param terraformAttribute The attribute on the parent resource this class is referencing
+  */
+  public constructor(terraformResource: cdktf.IInterpolatingParent, terraformAttribute: string) {
+    super(terraformResource, terraformAttribute);
+  }
+
+  public get internalValue(): AcmCertificateDomainValidationOptions | undefined {
+    let hasAnyValues = this.isEmptyObject;
+    const internalValueResult: any = {};
+    return hasAnyValues ? internalValueResult : undefined;
+  }
+
+  public set internalValue(value: AcmCertificateDomainValidationOptions | undefined) {
+    if (value === undefined) {
+      this.isEmptyObject = false;
+    }
+    else {
+      this.isEmptyObject = Object.keys(value).length === 0;
+    }
+  }
 
   // domain_name - computed: true, optional: false, required: false
   public get domainName() {
@@ -254,8 +290,9 @@ export class AcmCertificate extends cdktf.TerraformResource {
   }
 
   // domain_validation_options - computed: true, optional: false, required: false
-  public domainValidationOptions(index: string) {
-    return new AcmCertificateDomainValidationOptions(this, 'domain_validation_options', index, false);
+  private _domainValidationOptions = [new AcmCertificateDomainValidationOptionsOutputReference(this, \\"domain_validation_options\\")];
+  public get domainValidationOptions() {
+    return this._domainValidationOptions;
   }
 
   // id - computed: true, optional: true, required: false
@@ -333,7 +370,7 @@ export class AcmCertificate extends cdktf.TerraformResource {
   }
 
   // options - computed: false, optional: true, required: false
-  private _options = new AcmCertificateOptionsOutputReference(this, \\"options\\", true);
+  private _options = new AcmCertificateOptionsOutputReference(this, \\"options\\");
   public get options() {
     return this._options;
   }

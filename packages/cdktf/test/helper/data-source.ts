@@ -1,6 +1,6 @@
 import { Construct } from "constructs";
 import {
-  ComplexComputedList,
+  ComplexListItem,
   TerraformDataSource,
   TerraformMetaArguments,
   StringMap,
@@ -34,8 +34,8 @@ export class TestDataSource extends TerraformDataSource {
     this.name = config.name;
   }
 
-  public complexComputedList(index: string) {
-    return new TestComplexComputedList(this, "complex_computed_list", index);
+  public get complexComputedList() {
+    return [new TestComplexListItem(this, "complex_computed_list")];
   }
 
   public stringMap(key: string) {
@@ -61,7 +61,7 @@ export class TestDataSource extends TerraformDataSource {
   }
 }
 
-class TestComplexComputedList extends ComplexComputedList {
+class TestComplexListItem extends ComplexListItem {
   public get id() {
     return this.getStringAttribute("id");
   }

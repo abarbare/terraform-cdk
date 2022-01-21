@@ -1,5 +1,6 @@
 // Copied from https://github.com/aws/constructs/blob/e01e47f78ef1e9b600efcd23ff7705aa8d384017/lib/resolvable.ts
 import { IConstruct } from "constructs";
+import { ComplexListItem } from "..";
 import { TokenString } from "./private/encoding";
 import { TokenMap } from "./private/token-map";
 import { TokenizedStringFragments } from "./string-fragments";
@@ -95,6 +96,8 @@ export interface ITokenResolver {
    * Resolve a tokenized number list
    */
   resolveNumberList(l: number[], context: IResolveContext): any;
+
+  resolveComplexList(l: ComplexListItem[], context: IResolveContext): any;
 
   /**
    * Resolve a tokenized map
@@ -207,6 +210,19 @@ export class DefaultTokenResolver implements ITokenResolver {
     }
 
     const token = TokenMap.instance().lookupNumberList(xs);
+    if (token === undefined) {
+      return xs;
+    }
+    return context.resolve(token);
+  }
+
+  public resolveComplexList(xs: ComplexListItem[], context: IResolveContext) {
+    // Must be a singleton list token, because concatenation is not allowed.
+    if (xs.length !== 1) {
+      throw new Error(`Cannot add elements to list token, got: ${xs}`);
+    }
+
+    const token = xs[0].interpolationAsList();
     if (token === undefined) {
       return xs;
     }

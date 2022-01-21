@@ -1,4 +1,5 @@
 // copied from https://github.com/aws/constructs/blob/e01e47f78ef1e9b600efcd23ff7705aa8d384017/lib/private/encoding.ts
+import { ComplexListItem } from "../../complex-computed-list";
 import { IFragmentConcatenator, IResolvable } from "../resolvable";
 import { TokenizedStringFragments } from "../string-fragments";
 import { Tokenization } from "../token";
@@ -146,6 +147,12 @@ export function containsNumberListTokenElement(xs: any[]) {
   return xs.some(
     (x) => typeof x === "number" && extractTokenDouble(x, true) !== undefined
   );
+}
+
+export function containsComplexListItemElement(
+  xs: any[]
+): xs is ComplexListItem[] {
+  return xs.some(ComplexListItem.isComplexListItem);
 }
 
 export function containsMapToken(xs: { [key: string]: any }) {
