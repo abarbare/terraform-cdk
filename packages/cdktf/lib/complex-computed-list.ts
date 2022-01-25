@@ -3,6 +3,7 @@ import {
   IInterpolatingParent,
   ITerraformAddressable,
 } from "./terraform-addressable";
+import { propertyAccess, Fn } from ".";
 
 abstract class ComplexComputedAttribute implements IInterpolatingParent {
   constructor(
@@ -111,6 +112,38 @@ export class AnyMap {
       this.terraformResource.interpolationForAttribute(
         `${this.terraformAttribute}["${key}"]`
       )
+    );
+  }
+}
+
+/**
+ * @deprecated Going to be replaced by Array of ComplexListItem
+ * and will be removed in the future
+ */
+export class ComplexComputedList extends ComplexComputedAttribute {
+  constructor(
+    protected terraformResource: IInterpolatingParent,
+    protected terraformAttribute: string,
+    protected complexComputedListIndex: string,
+    protected wrapsSet?: boolean
+  ) {
+    super(terraformResource, terraformAttribute);
+  }
+
+  public interpolationForAttribute(property: string) {
+    if (this.wrapsSet) {
+      return propertyAccess(
+        Fn.tolist(
+          this.terraformResource.interpolationForAttribute(
+            this.terraformAttribute
+          )
+        ),
+        [this.complexComputedListIndex, property]
+      );
+    }
+
+    return this.terraformResource.interpolationForAttribute(
+      `${this.terraformAttribute}.${this.complexComputedListIndex}.${property}`
     );
   }
 }
