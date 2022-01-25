@@ -25,7 +25,7 @@ namespace MyCompany.MyApp
 
 	    new Instance(this, "web", new InstanceConfig {
                 AvailabilityZone = "cn-bj2-04",
-                ImageId = Token.AsString(Fn.Lookup(Fn.Element(images, 0), "id", "")),
+                ImageId = Token.AsString(Fn.Lookup(Fn.Element(images.Images, 0), "id", "")),
                 InstanceType = "n-basic-2",
                 RootPassword = "wA1234567",
                 Name = "cdktf-example-instance",
