@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { App, TerraformStack, Fn } from "cdktf";
+import { App, TerraformStack, Fn, Token } from "cdktf";
 import {
   UcloudProvider,
   Instance,
@@ -23,7 +23,9 @@ class MyStack extends TerraformStack {
 
     new Instance(this, "web", {
       availabilityZone: "cn-bj2-04",
-      imageId: Fn.lookup(Fn.element(images.images, 0), "id", ""),
+      imageId: Token.asString(
+        Fn.lookup(Fn.element(images.images, 0), "id", "")
+      ),
       instanceType: "n-basic-2",
       rootPassword: "wA1234567",
       name: "cdktf-example-instance",

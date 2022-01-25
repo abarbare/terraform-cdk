@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { App, TerraformStack, TerraformOutput, Fn } from "cdktf";
+import { App, TerraformStack, TerraformOutput, Fn, Token } from "cdktf";
 import {
   cloudfront,
   AwsProvider,
@@ -81,21 +81,27 @@ class MyStack extends TerraformStack {
     // })
 
     const record = new route53.Route53Record(this, "CertValidationRecord", {
-      name: Fn.lookup(
-        Fn.element(cert.domainValidationOptions, 0),
-        "resourceRecordName",
-        ""
-      ),
-      type: Fn.lookup(
-        Fn.element(cert.domainValidationOptions, 0),
-        "resourceRecordType",
-        ""
-      ),
-      records: [
+      name: Token.asString(
         Fn.lookup(
           Fn.element(cert.domainValidationOptions, 0),
-          "resourceRecordValue",
+          "resourceRecordName",
           ""
+        )
+      ),
+      type: Token.asString(
+        Fn.lookup(
+          Fn.element(cert.domainValidationOptions, 0),
+          "resourceRecordType",
+          ""
+        )
+      ),
+      records: [
+        Token.asString(
+          Fn.lookup(
+            Fn.element(cert.domainValidationOptions, 0),
+            "resourceRecordValue",
+            ""
+          )
         ),
       ],
       // zoneId: zone.zoneId,

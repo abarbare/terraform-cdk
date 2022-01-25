@@ -25,7 +25,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 
 	ucloud.NewInstance(stack, jsii.String("web"), &ucloud.InstanceConfig{
 		AvailabilityZone: jsii.String("cn-bj2-04"),
-		ImageId:          cdktf.Fn_lookup(cdktf.Fn_element(images.Images, 0), jsii.String("id"), jsii.String("")),
+		ImageId:          cdktf.Token_AsString(cdktf.Fn_lookup(cdktf.Fn_element(images.Images, 0), jsii.String("id"), jsii.String(""))),
 		InstanceType:     jsii.String("n-basic-2"),
 		RootPassword:     jsii.String("wA1234567"),
 		Name:             jsii.String("cdktf-example-instance"),
