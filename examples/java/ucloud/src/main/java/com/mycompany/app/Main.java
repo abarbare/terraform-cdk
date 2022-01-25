@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.hashicorp.cdktf.App;
+import com.hashicorp.cdktf.Fn;
 import com.hashicorp.cdktf.TerraformOutput;
 import com.hashicorp.cdktf.TerraformStack;
 
@@ -32,7 +33,7 @@ public class Main extends TerraformStack {
 
 	Instance.Builder.create(this, "web")
 	    .availabilityZone("cn-bj2-04")
-            .imageId(images.images("0").getId())
+            .imageId(Fn.lookup(Fn.element(images.images, 0), "id", ""))
             .instanceType("n-basic-2")
             .rootPassword("wA1234567")
             .name("cdktf-example-instance")
