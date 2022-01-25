@@ -4,6 +4,7 @@ import { Tokenization } from "./tokens/token";
 import { LazyBase } from "./tokens/lazy";
 import { App } from "./app";
 import { TerraformStack } from "./terraform-stack";
+import { containsComplexListItemElement } from "./tokens/private/encoding";
 
 class TFExpression extends Intrinsic implements IResolvable {
   public isInnerTerraformExpression = false;
@@ -187,6 +188,10 @@ function markAsInner(arg: any) {
 
   if (typeof arg === "object") {
     if (Array.isArray(arg)) {
+      if (containsComplexListItemElement(arg)) {
+        // Don't mark ComplexListItemElements as inner
+        return; // FIXME: check if needs to be marked as inner.
+      }
       arg.forEach(markAsInner);
     } else {
       Object.keys(arg).forEach((key) => markAsInner(arg[key]));

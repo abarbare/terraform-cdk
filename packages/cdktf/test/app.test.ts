@@ -551,7 +551,13 @@ describe("Cross Stack references", () => {
     const originOutput = Object.values(
       JSON.parse(originStackSynth).output as { value: string }[]
     )[0].value;
-    expect(originOutput).toContain(".complex_computed_list.42.id");
+    expect(originOutput).toContain(".complex_computed_list");
+    expect(targetStackSynth).toHaveResourceWithProperties(TestResource, {
+      name: expect.stringContaining("${lookup(element("),
+    });
+    expect(targetStackSynth).toHaveResourceWithProperties(TestResource, {
+      name: expect.stringContaining(', 42), "id", "")}'),
+    });
   });
 
   it("resolves complex computed lists as fqn with cross stack references", () => {
@@ -568,19 +574,15 @@ describe("Cross Stack references", () => {
       JSON.parse(originStackSynth).output as { value: string }[]
     )[0].value;
     expect(originOutput).toMatchInlineSnapshot(
-      `"\${other_test_resource.OriginStack_other_935318CE}"`
+      `"\${other_test_resource.OriginStack_other_935318CE.complex_computed_list}"`
     );
     expect(Object.keys(JSON.parse(targetStackSynth).output).length).toBe(1);
     const targetOutput = Object.values(
       JSON.parse(targetStackSynth).output as { value: string }[]
     )[0].value;
-    expect(targetOutput).toMatchInlineSnapshot(`
-      Object {
-        "complexComputedListIndex": "42",
-        "terraformAttribute": "complex_computed_list",
-        "terraformResource": "\${data.terraform_remote_state.TestStack_crossstackreferenceinputOriginStack_EB91482E.outputs.OriginStack_crossstackoutputothertestresourceOriginStackother935318CE_FB44ED5E}",
-      }
-    `);
+    expect(targetOutput).toMatchInlineSnapshot(
+      `"\${element(data.terraform_remote_state.TestStack_crossstackreferenceinputOriginStack_EB91482E.outputs.OriginStack_crossstackoutputothertestresourceOriginStackother935318CEcomplexcomputedlist_FBDEFB6A, 42)}"`
+    );
   });
 
   it("resolves output reference as fqn with cross stack references", () => {
