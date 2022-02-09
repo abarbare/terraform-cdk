@@ -11,8 +11,6 @@ import {
   Language,
 } from "@cdktf/provider-generator";
 
-import { throwIfNotProjectDirectory } from "./helper/check-directory";
-import { checkEnvironment } from "./helper/check-environment";
 import { checkForEmptyDirectory, runInit } from "./helper/init";
 import { renderInk } from "./helper/render-ink";
 import { terraformCheck } from "./helper/terraform-check";
@@ -35,6 +33,8 @@ import { Errors } from "../../lib/errors";
 import { saveOutputs, normalizeOutputPath } from "./helper/outputs";
 import { Output } from "./ui/output";
 import { NestedTerraformOutputs } from "./ui/terraform-context";
+import { throwIfNotProjectDirectory } from "./helper/check-directory";
+import { checkEnvironment } from "./helper/check-environment";
 
 const chalkColour = new chalk.Instance();
 const config = cfg.readConfigSync();
@@ -69,16 +69,16 @@ export async function convert({ language }: any) {
     output = all;
     await sendTelemetry("convert", { ...stats, error: false });
   } catch (err) {
-    throw Errors.Internal("convert", (err as Error).message, { language });
+    throw Errors.Internal((err as Error).message, { language });
   }
 
   console.log(output);
 }
 
 export async function deploy(argv: any) {
-  throwIfNotProjectDirectory("deploy");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("deploy");
+  await checkEnvironment();
   const command = argv.app;
   const outdir = argv.output;
   const autoApprove = argv.autoApprove;
@@ -108,9 +108,9 @@ export async function deploy(argv: any) {
 }
 
 export async function destroy(argv: any) {
-  throwIfNotProjectDirectory("destroy");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("destroy");
+  await checkEnvironment();
   const command = argv.app;
   const outdir = argv.output;
   const autoApprove = argv.autoApprove;
@@ -127,9 +127,9 @@ export async function destroy(argv: any) {
 }
 
 export async function diff(argv: any) {
-  throwIfNotProjectDirectory("diff");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("diff");
+  await checkEnvironment();
   const command = argv.app;
   const outdir = argv.output;
   const stack = argv.stack;
@@ -144,9 +144,9 @@ export async function diff(argv: any) {
 }
 
 export async function get(argv: any) {
-  throwIfNotProjectDirectory("get");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("get");
+  await checkEnvironment();
   const args = argv as {
     output: string;
     language: Language;
@@ -179,7 +179,7 @@ export async function get(argv: any) {
 export async function init(argv: any) {
   await terraformCheck();
   await displayVersionMessage();
-  await checkEnvironment("init");
+  await checkEnvironment();
 
   checkForEmptyDirectory(".");
 
@@ -187,9 +187,9 @@ export async function init(argv: any) {
 }
 
 export async function list(argv: any) {
-  throwIfNotProjectDirectory("list");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("list");
+  await checkEnvironment();
   const command = argv.app;
   const outdir = argv.output;
 
@@ -237,9 +237,9 @@ export async function login(argv: any) {
 }
 
 export async function synth(argv: any) {
-  throwIfNotProjectDirectory("synth");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("synth");
+  await checkEnvironment();
   const command = argv.app;
   const outdir = argv.output;
   const jsonOutput = argv.json;
@@ -266,7 +266,7 @@ export async function synth(argv: any) {
 }
 
 export async function watch(argv: any) {
-  throwIfNotProjectDirectory("watch");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
   const command = argv.app;
   const outdir = argv.output;
@@ -295,9 +295,9 @@ export async function watch(argv: any) {
 }
 
 export async function output(argv: any) {
-  throwIfNotProjectDirectory("output");
+  throwIfNotProjectDirectory();
   await displayVersionMessage();
-  await checkEnvironment("output");
+  await checkEnvironment();
   const command = argv.app;
   const outdir = argv.output;
   const stack = argv.stack;
