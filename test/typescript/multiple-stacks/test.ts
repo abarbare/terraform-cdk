@@ -1,5 +1,5 @@
 import { TestDriver, onPosix, onWindows } from "../../test-helper";
-import { CdktfProject } from "../../../packages/cdktf-cli/lib/index";
+import { CdktfProject } from "cdktf-cli/lib/index";
 
 describe("multiple stacks", () => {
   let driver: TestDriver;
